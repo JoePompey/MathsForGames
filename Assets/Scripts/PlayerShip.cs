@@ -1,6 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class PlayerShip : MonoBehaviour
 {
@@ -10,7 +11,6 @@ public class PlayerShip : MonoBehaviour
     private float Yaw = 0f;
     private float SteerSpeed = Mathf.PI / 2f;
     private Rigidbody Ship;
-    private Transform ShipModel;
 
     [SerializeField] private InputActionAsset InputActions;
     private InputActionMap FlightControls;
@@ -18,7 +18,6 @@ public class PlayerShip : MonoBehaviour
     void Start()
     {
         Ship = GetComponent<Rigidbody>();
-        ShipModel = transform.Find("Model");
         FlightControls = InputActions.FindActionMap("FlightControls");
     }
     //.
@@ -40,19 +39,19 @@ public class PlayerShip : MonoBehaviour
         //Steering.
         if (FlightControls.FindAction("SteerLeft").IsPressed())
         {
-            SteerShip(0f, -SteerSpeed, Time.fixedDeltaTime);
+            SteerShip(0f, -SteerSpeed);
         }
         if (FlightControls.FindAction("SteerRight").IsPressed())
         {
-            SteerShip(0f, SteerSpeed, Time.fixedDeltaTime);
+            SteerShip(0f, SteerSpeed);
         }
         if (FlightControls.FindAction("PitchUp").IsPressed())
         {
-            SteerShip(SteerSpeed, 0f, Time.fixedDeltaTime);
+            SteerShip(SteerSpeed, 0f);
         }
         if (FlightControls.FindAction("PitchDown").IsPressed())
         {
-            SteerShip(-SteerSpeed, 0f, Time.fixedDeltaTime);
+            SteerShip(-SteerSpeed, 0f);
         }
         //.
     }
@@ -62,7 +61,7 @@ public class PlayerShip : MonoBehaviour
     void MoveForward(float Delta)
     {
         Vector3 ForwardVector = Mathsy.FindForward(Pitch, Yaw);
-        Vector3 MoveVector = Mathsy.Scale(ForwardVector, Speed * Delta);
+        Vector3 MoveVector = Mathsy.Scale(ForwardVector, Speed * Delta * -1f);
         Vector3 NewPosition = Ship.position + MoveVector;
 
         Ship.MovePosition(NewPosition);
@@ -70,20 +69,13 @@ public class PlayerShip : MonoBehaviour
     //.
 
     //Steer the ship.
-    void SteerShip(float AddPitch, float AddYaw, float Delta)
+    void SteerShip(float AddPitch, float AddYaw)
     {
-        Pitch += AddPitch * Delta;
-        Yaw += AddYaw * Delta;
+        transform.Rotate(AddPitch, AddYaw, 0f, Space.Self);
 
-        FaceModelForward();
-    }
-    //.
-
-    //Rotate model to face forward.
-    void FaceModelForward()
-    {
-        Vector3 ForwardVector = Mathsy.FindForward(Pitch, Yaw);
-        ShipModel.rotation = Quaternion.LookRotation(ForwardVector * -1f, ShipModel.up);
+        Vector3 CurrentAngle = transform.localEulerAngles;
+        Pitch = Mathsy.DegreeToRadian(-CurrentAngle.x);
+        Yaw = Mathsy.DegreeToRadian(CurrentAngle.y);
     }
     //.
 }
