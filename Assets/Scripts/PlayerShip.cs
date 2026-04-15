@@ -6,15 +6,15 @@ using UnityEngine.UIElements;
 public class PlayerShip : MonoBehaviour
 {
     //Initialisation.
+    private Rigidbody Ship;
+    [SerializeField] private InputActionAsset InputActions;
+    private InputActionMap FlightControls;
+
     private float Speed = 10f;
     private float Pitch = 0f;
     private float Yaw = 0f;
     private float SteerSpeed = Mathf.PI / 2f;
-    private Rigidbody Ship;
-
-    [SerializeField] private InputActionAsset InputActions;
-    private InputActionMap FlightControls;
-
+    
     void Start()
     {
         Ship = GetComponent<Rigidbody>();
